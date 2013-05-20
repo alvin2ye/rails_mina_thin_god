@@ -1,0 +1,61 @@
+upstream <%= "#{app}_web_services" %> {
+    server 127.0.0.1:3100;
+    server 127.0.0.1:3101;
+}
+
+server {
+    listen <%= nginx_server_port %>;
+    server_name <%= nginx_server_name %>;
+    root  <%= deploy_to %>/current/public;
+    
+    gzip on;
+    gzip_types text/plain text/xml application/xml application/xml+rss
+    text/css text/javascript application/javascript application/json;
+
+
+    error_page 551 =503 @maintenance;
+    location @maintenance {
+        rewrite ^(.*)$ /system/maintenance.html break;
+    }
+    set $maintenance 0;
+    if (-f $document_root/system/maintenance.html) {
+        set $maintenance 1;
+    }
+    if ($request_uri = /favicon.ico) {
+        # Browsers will try to get favicon if it's not returned with 200ok status
+        set $maintenance 0;
+    }
+    if ($maintenance) {
+        # There can be several reasons for 503 error. We custom return 551 error
+        # to ensure maintenance.html is only shown when it's really maintenance
+        return 551;
+    }
+
+    rewrite ^/(.*)/$ /$1 permanent; # Truncate trailing slashes
+    try_files $uri @rails;
+
+    expires -1;
+
+    location = /favicon.ico {
+        try_files $uri =204;
+        access_log off;
+        log_not_found off;
+    }
+        
+    location @rails {
+        proxy_pass http://<%= "#{app}_web_services" %>;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_intercept_errors on;
+        expires -1;
+    }
+    
+    error_page 500 502 503 504 /500.html;
+    error_page 403 /403.html;
+    error_page 404 /404.html;
+    
+    client_max_body_size 50M;
+    keepalive_timeout 10;
+}

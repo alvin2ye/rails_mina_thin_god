@@ -1,0 +1,49 @@
+rails_env = "<%= rails_env %>"
+rails_root = "<%= "#{deploy_to!}/#{current_path!}" %>"
+
+God.pid_file_directory = File.join(rails_root, %w(tmp pids))
+God.watch do |w|
+  w.name = "thin"
+  w.interval = 30.seconds # default
+
+  w.start = "cd #{rails_root} && bundle exec thin start -C config/thin.yml"
+  w.stop = "cd #{rails_root} && bundle exec thin stop -C config/thin.yml"
+  w.restart = "cd #{rails_root} && bundle exec thin restart -C config/thin.yml"
+
+  w.start_grace = 30.seconds
+  w.restart_grace = 30.seconds
+
+  w.behavior(:clean_pid_file)
+
+  w.start_if do |start|
+    start.condition(:process_running) do |c|
+      c.interval = 10.seconds
+      c.running = false
+    end
+  end
+
+  w.restart_if do |restart|
+    restart.condition(:memory_usage) do |c|
+      c.above = 300.megabytes
+      c.times = [3, 5] # 3 out of 5 intervals
+    end
+
+    restart.condition(:cpu_usage) do |c|
+      c.above = 80.percent
+      c.times = 5
+    end
+  end
+
+  # lifecycle
+  w.lifecycle do |on|
+    on.condition(:flapping) do |c|
+      c.to_state = [:start, :restart]
+      c.times = 5
+      c.within = 5.minute
+      c.transition = :unmonitored
+      c.retry_in = 10.minutes
+      c.retry_times = 5
+      c.retry_within = 2.hours
+    end
+  end
+end
