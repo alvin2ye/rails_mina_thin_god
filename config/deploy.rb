@@ -16,7 +16,7 @@ Dir['lib/mina/servers/*.rb'].each { |f| load f }
 ###########################################################################
 
 set :app,                'rails_mina_thin_god'
-set :repository,         'git@github.com:alvin2ye/rails_mina_thin_god.git'
+set :repository,         'git://github.com/alvin2ye/rails_mina_thin_god.git'
 set :keep_releases,       9999        #=> I like to keep all my releases
 set :default_server,     :test_server
 
