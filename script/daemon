@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+ 
+# script/daemon
+ 
+ENV["APP_ROOT"] ||= File.expand_path("#{File.dirname(__FILE__)}/..")
+ENV["RAILS_ENV_PATH"] ||= "#{ENV["APP_ROOT"]}/config/environment.rb"
+ 
+script = "#{ENV["APP_ROOT"]}/daemons/#{ARGV[1]}"
+ 
+options = {
+:app_name => "robot",
+:ARGV => ARGV,
+:dir_mode => :normal,
+:dir => "#{ENV["APP_ROOT"]}/tmp/pids",
+:log_output => true,
+:multiple => false,
+:backtrace => true,
+:monitor => false
+}
+ 
+Daemons.run(script, options)
