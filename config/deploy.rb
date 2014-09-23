@@ -2,25 +2,24 @@ require 'mina/bundler'
 require 'mina/rails'
 require 'mina/git'
 require 'mina/whenever'
-# require 'mina/rvm'  # for rbenv support. (http://rbenv.org)
  
 set :domain, '__domain__'
 set :port, "22"
 set :user, "__username__"
-set :deploy_to, '__path__'
-set :repository, 'git@git.agideo.com:agideo/__appname__'
+set :deploy_to, '__deploytopath__'
+set :repository, '__repository__'
 set :branch, 'master'
  
 set :shared_paths, [
   'config/database.yml', 
   'config/initializers/secret_token.rb', 
   'backup.rb', 
-  'log', 'db', 'tmp', 
+  'log', 'tmp', 
   "public/uploads"]
  
 task :environment do
-  # your_bash_env
-  # queue! %[source /home/agideo/ruby193env.bash] 
+  queue! %[export PATH="$HOME/.rbenv/bin:$PATH"]
+  queue! %[eval "$(rbenv init -)"]
 end
  
 task :setup => :environment do

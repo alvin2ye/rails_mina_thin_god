@@ -34,7 +34,7 @@ def generic_monitoring(w, options = {})
   end
 end
  
-%w{3400 3401}.each do |port|
+%w{__port1__ __port1__}.each do |port|
     God.watch do |w|
       script = "cd #{RAILS_ROOT} && thin -e #{ENV["RAILS_ENV"]} --pid ./tmp/pids/thin.#{port}.pid -p #{port} -d"
       w.name = "__appname__-thin-#{port}"
@@ -50,37 +50,37 @@ end
 end
 
 # receive email
-God.watch do |w|
-  script = "cd #{RAILS_ROOT} && RAILS_ENV=#{ENV["RAILS_ENV"]} bundle exec ruby script/daemon"
-  w.name = "robot"
-  w.group = "__appname__"
-  w.interval = 60.seconds
-  w.start = "#{script} start robot.rb"
-  w.restart = "#{script} restart robot.rb"
-  w.stop = "#{script} stop robot.rb"
-  w.start_grace = 20.seconds
-  w.restart_grace = 20.seconds
-  w.pid_file = "#{RAILS_ROOT}/tmp/pids/robot.pid"
-  
-  w.behavior(:clean_pid_file)
-  
-  generic_monitoring(w, :cpu_limit => 80.percent, :memory_limit => 200.megabytes)
-end
+# God.watch do |w|
+#   script = "cd #{RAILS_ROOT} && RAILS_ENV=#{ENV["RAILS_ENV"]} bundle exec ruby script/daemon"
+#   w.name = "robot"
+#   w.group = "__appname__"
+#   w.interval = 60.seconds
+#   w.start = "#{script} start robot.rb"
+#   w.restart = "#{script} restart robot.rb"
+#   w.stop = "#{script} stop robot.rb"
+#   w.start_grace = 20.seconds
+#   w.restart_grace = 20.seconds
+#   w.pid_file = "#{RAILS_ROOT}/tmp/pids/robot.pid"
+#   
+#   w.behavior(:clean_pid_file)
+#   
+#   generic_monitoring(w, :cpu_limit => 80.percent, :memory_limit => 200.megabytes)
+# end
 
 # delayed_job
-God.watch do |w|
-  script = "cd #{RAILS_ROOT} && bundle exec ruby script/delayed_job -e #{ENV["RAILS_ENV"]} --pid-dir tmp/pids/"
-  w.name = "delayed_job"
-  w.group = "__appname__"
-  w.interval = 60.seconds
-  w.start = "#{script} start"
-  w.restart = "#{script} restart"
-  w.stop = "#{script} stop"
-  w.start_grace = 20.seconds
-  w.restart_grace = 20.seconds
-  w.pid_file = "#{RAILS_ROOT}/tmp/pids/delayed_job.pid"
-  
-  w.behavior(:clean_pid_file)
-  
-  generic_monitoring(w, :cpu_limit => 80.percent, :memory_limit => 200.megabytes)
-end
+# God.watch do |w|
+#   script = "cd #{RAILS_ROOT} && bundle exec ruby script/delayed_job -e #{ENV["RAILS_ENV"]} --pid-dir tmp/pids/"
+#   w.name = "delayed_job"
+#   w.group = "__appname__"
+#   w.interval = 60.seconds
+#   w.start = "#{script} start"
+#   w.restart = "#{script} restart"
+#   w.stop = "#{script} stop"
+#   w.start_grace = 20.seconds
+#   w.restart_grace = 20.seconds
+#   w.pid_file = "#{RAILS_ROOT}/tmp/pids/delayed_job.pid"
+#   
+#   w.behavior(:clean_pid_file)
+#   
+#   generic_monitoring(w, :cpu_limit => 80.percent, :memory_limit => 200.megabytes)
+# end
